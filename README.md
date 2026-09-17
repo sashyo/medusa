@@ -1,3 +1,17 @@
+<!-- minidauth:start -->
+> ## 🔒 This build is minidauth'd
+>
+> **Medusa, with a key nobody holds.** Your customers, their names, phone numbers, companies and the street lines of their addresses is sealed before it ever reaches the database, encrypted with a key that is never assembled anywhere, not even to decrypt. The key lives as threshold shares across the [Tide](https://tide.org) network, so the classic breach, someone walking off with your database or a backup, turns up nothing readable.
+>
+> - **Your database holds only ciphertext.** A stolen dump or a leaked backup is useless to whoever takes it.
+> - **There is no standing key to steal.** The vendor key is never whole, not in this app and not on any single server.
+> - **Reads are governed, not assumed.** A quorum grants the reading role. Revoke it and reads stop everywhere, at once.
+> - **Nobody juggles keys.** People keep the login they already have. The gate is a role, not a keyfile they can lose.
+> - **Nothing else changes.** Medusa works exactly as it does upstream, and sealing stays off until you turn it on.
+>
+> See how it works → **[minidauth](https://github.com/sashyo/minidauth)** · **[dauth.me](https://www.dauth.me)**
+<!-- minidauth:end -->
+
 <p align="center">
   <a href="https://www.medusajs.com">
   <picture>
@@ -5,6 +19,11 @@
     <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/59018053/229103726-e5b529a3-9b3f-4970-8a1f-c6af37f087bf.svg">
     <img alt="Medusa logo" src="https://user-images.githubusercontent.com/59018053/229103726-e5b529a3-9b3f-4970-8a1f-c6af37f087bf.svg">
     </picture>
+
+<!-- minidauth-badge -->
+<p align="center">
+  <a href="https://github.com/sashyo/minidauth"><img alt="minidauth'd" src="https://img.shields.io/badge/minidauth%27d-sealed_at_rest-2ea44f?style=for-the-badge&logo=lock&logoColor=white"></a>
+</p>
   </a>
 </p>
 <h1 align="center">
