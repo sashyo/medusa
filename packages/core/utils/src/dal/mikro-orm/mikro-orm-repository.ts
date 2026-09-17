@@ -10,6 +10,7 @@ import {
   ReferenceKind,
 } from "@medusajs/deps/mikro-orm/core"
 import { SqlEntityManager } from "@medusajs/deps/mikro-orm/postgresql"
+import { openForRead, sealForWrite } from "../../minidauth/minidauth-seal"
 import {
   Context,
   DAL,
@@ -78,7 +79,15 @@ export class MikroOrmBase {
     data: any,
     options?: any
   ): Promise<TOutput> {
-    return await mikroOrmSerializer<TOutput>(data, options)
+    const result = await mikroOrmSerializer<TOutput>(data, options)
+    // minidauth: open the SEALED fields on the way out, for the reader in context. This base
+    // serialize is what every module service (and remoteQuery through it) funnels reads through, so
+    // opening here covers all read paths. The entity type is taken from the loaded records, since
+    // this injected serializer is not bound to one entity. Batched, and fail-safe (records stay
+    // sealed with no reader in context, an ungranted reader, or the sidecar down). No-op unless on.
+    const sample = Array.isArray(data) ? data[0] : data
+    await openForRead(sample?.constructor?.name, result)
+    return result
   }
 }
 
@@ -334,6 +343,10 @@ export function mikroOrmBaseRepositoryFactory<const T extends object>(
     ): Promise<InferRepositoryReturnType<T>[]> {
       const manager = this.getActiveManager<EntityManager>(context)
 
+      // minidauth: seal the SEALED fields on the inbound payloads before they become entities, so
+      // ciphertext is what reaches Postgres. A no-op unless MINIDAUTH_SEAL_URL is set.
+      await sealForWrite(this.entity?.name, data)
+
       const entities = data.map((data_) => {
         return manager.create(this.entity, data_)
       })
@@ -420,6 +433,9 @@ export function mikroOrmBaseRepositoryFactory<const T extends object>(
       const manager = this.getActiveManager<EntityManager>(context)
 
       await this.initManyToManyToDetachAllItemsIfNeeded(data, context)
+
+      // minidauth: seal the SEALED fields on each `update` payload before it is assigned.
+      await sealForWrite(this.entity?.name, data)
 
       data.forEach(({ entity, update }) => {
         manager.assign(entity, update, {

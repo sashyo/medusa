@@ -1,5 +1,5 @@
 import { ApiKeyDTO, IApiKeyModuleService, Logger } from "@medusajs/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/utils"
+import { ContainerRegistrationKeys, Modules, withMinidauthReader } from "@medusajs/utils"
 import { NextFunction, RequestHandler } from "express"
 import type {
   JwtPayload,
@@ -109,7 +109,10 @@ export const authenticate = (
     // If the entity is authenticated, and it is a registered actor we can continue
     if (authContext?.actor_id) {
       req_.auth_context = authContext
-      return next()
+      // minidauth: carry the verified actor id as the reader for this request, so sealed fields the
+      // handler reads open as that actor, gated by their quorum-granted role. A no-op unless sealing
+      // is configured.
+      return withMinidauthReader(authContext.actor_id, () => next())
     }
 
     // If the entity is authenticated, but there is no registered actor yet, we can continue (eg. in the case of a user invite) if allow unregistered is set
